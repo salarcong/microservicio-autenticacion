@@ -1,0 +1,44 @@
+# Entornos virtuales
+venv/
+.env/
+.venv/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de logs y temporales
+*.log
+*.tmp
+
+# Archivos de configuración de editor/IDE
+.vscode/
+.idea/
+*.swp
+
+# Archivos de pruebas y cobertura
+htmlcov/
+.tox/
+.coverage
+.cache
+.pytest_cache/
+
+# Dependencias descargadas
+*.egg-info/
+dist/
+build/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Bandit report
+bandit.json
+
+# Node/npm (si usas algún frontend JS)
+node_modules/
+
+# Otros archivos sensibles
+*.env
+.env.*
