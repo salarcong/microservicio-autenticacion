@@ -1,17 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from app.auth import verificar_credenciales
+from app.models import UserLogin, LoginResponse
 
 app = FastAPI()
 
-@app.post("/login")
-def login(data: dict):
-    username = data.get("username")
-    password = data.get("password")
-    if not username or not password:
-        raise HTTPException(status_code=400, detail="Faltan datos")
+@app.post("/login", response_model=LoginResponse)
+def login(data: UserLogin):
+    resultado = verificar_credenciales(data.username, data.password)
 
-    resultado = verificar_credenciales(username, password)
-    
     if resultado == "Acceso concedido":
         return {"mensaje": "Bienvenido"}
     elif "bloqueada" in resultado:
