@@ -11,3 +11,4 @@ users_db = {
         "blocked": False
     }
 }
+
