@@ -1,0 +1,82 @@
+substitutions:
+  _REGION: "us-central1"
+  _AR_REPO: "microservices"
+  _SERVICE_NAME: "auth-service"   # como quieres que se llame en Cloud Run
+  _PY_TEST_DIR: "test"            # directorio de pruebas
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  # 0) Cache de dependencias (opcional). Puedes omitir esta sección si quieres.
+  - name: gcr.io/cloud-builders/docker
+    args: ["version"]
+
+  # 1) Lint (flake8) si está presente .flake8
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -lc
+      - |
+        pip install --no-cache-dir -r requirements.txt flake8 || exit 1
+        if [ -f ".flake8" ]; then
+          echo ">> Running flake8..."
+          flake8 || exit 1
+        else
+          echo "No .flake8 found, skipping lint."
+        fi
+
+  # 2) Tests con pytest si hay carpeta test/
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -lc
+      - |
+        if [ -d "${_PY_TEST_DIR}" ]; then
+          echo ">> Running pytest..."
+          pip install --no-cache-dir -r requirements.txt pytest || exit 1
+          pytest -q
+        else
+          echo "No tests folder found, skipping tests."
+        fi
+
+  # 3) Build de la imagen
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA
+      - .
+
+  # 4) Push a Artifact Registry
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA
+
+  # 5) Deploy a Cloud Run (público; quítalo si quieres autenticación)
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --cpu=1
+      - --memory=512Mi
+      - --max-instances=5
+      - --min-instances=0
+      - --port=8080
+      # Si ya sabes cuál es tu service account de runtime, inclúyela:
+      # - --service-account=run-runtime@${PROJECT_ID}.iam.gserviceaccount.com
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA
+
+timeout: "1800s"
