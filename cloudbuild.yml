@@ -38,7 +38,7 @@ steps:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -d "${_PY_TEST_DIR}" ]; then
           pip install pytest
-          export PYTHONPATH=$PWD
+          export PYTHONPATH=$$PWD
           echo ">> Running pytest..."
           pytest -q
         else
