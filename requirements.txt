@@ -3,3 +3,4 @@ uvicorn
 bcrypt
 pytest
 httpx
+PyJWT>=2,<3
