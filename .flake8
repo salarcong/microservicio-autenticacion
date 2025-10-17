@@ -1,3 +1,10 @@
 [flake8]
-max-line-length = 88
-exclude = .git,__pycache__,venv
+# No revises dependencias, venv ni artefactos
+exclude = .venv, venv, .git, __pycache__, **/site-packages
+# Líneas más largas permitidas (ajústalo si quieres)
+max-line-length = 120
+# Reglas problemáticas comunes (coherente con Black)
+extend-ignore = E203, W503
+# Ignorar imports sin usar en estos archivos si lo necesitas
+per-file-ignores =
+    app/main.py: F401

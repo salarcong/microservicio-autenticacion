@@ -16,19 +16,15 @@ steps:
   - name: python:3.12
     entrypoint: bash
     args:
-      - -lc
-      - |
-        python -m venv .venv
-        source .venv/bin/activate
-        pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install flake8
-        if [ -f ".flake8" ]; then
-          echo ">> Running flake8..."
-          flake8
-        else
-          echo "No .flake8 found, skipping lint."
-        fi
+    - -lc
+    - |
+      python -m venv .venv
+      source .venv/bin/activate
+      pip install --upgrade pip
+      [ -f requirements.txt ] && pip install -r requirements.txt
+      pip install flake8
+      echo ">> Running flake8 on app/ scripts/ test/"
+      flake8 --config .flake8 app scripts test
 
   # 2) Tests con pytest en venv (misma imagen de Python)
   - name: python:3.12
